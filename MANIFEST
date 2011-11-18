@@ -1,0 +1,10 @@
+Build.PL
+Changes
+MANIFEST
+Makefile.PL
+README
+lib/Test/Meta.pm
+t/00.load.t
+t/local_perlcritic.t
+t/local_pod-coverage.t
+t/local_pod.t
