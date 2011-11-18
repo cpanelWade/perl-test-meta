@@ -18,9 +18,11 @@ sub get_meta_hr_from_file {
 1;
 __END__
 
+=encoding utf8
+
 =head1 NAME
 
-Test::Meta - [One line description of module's purpose here]
+Test::Meta - Explictly describe your tests and automatically act on said description
 
 
 =head1 VERSION
@@ -30,28 +32,91 @@ This document describes Test::Meta version 0.1
 
 =head1 SYNOPSIS
 
-    use Test::Meta;
+    use Test::Meta (
+        'POD' => 1,
+        'Memory' => 1
+    );
 
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
+…
+
+    # SKIP POD tests are only run under RELEASE_TESTING.
   
-  
+
 =head1 DESCRIPTION
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
+Using this module a developer can describe (L<Test::Meta::Desc>) his tests.
 
+At runtime the description helps define a set of rules (L<Test::Meta::Rule>) to act on.
+
+For example, in the SYNOPSIS example the POD rule enabled the RELEASE_TESTING Rule.
 
 =head1 INTERFACE 
 
-=for author to fill in:
-    Write a separate section listing the public components of the modules
-    interface. These normally consist of either subroutines that may be
-    exported, or methods that may be called on objects belonging to the
-    classes provided by the module.
+This is a super basic and inflexible–logic list that highlights the idea.
+
+The value of each given rule is passed to the rule or rules it triggers so it can act accordingly.
+
+=head2 Built in Rules
+
+=over 4
+
+=item RELEASE_TESTING
+
+skip_all(…) if !$ENV{'RELEASE_TESTING'}
+
+
+=item AUTOMATED_TESTING
+
+skip_all(…) if $ENV{'AUTOMATED_TESTING'}
+
+
+=item HEAVY_TESTING
+
+skip_all(…) if !$ENV{'HEAVY_TESTING'}
+
+=item OS
+
+skip_all(…) if the current OS is not the same as the given OS
+
+=item Meh
+
+turn fail()s into TODOs
+
+=back 
+
+=head2 Built in Descriptions
+
+=over
+
+=item STDIN
+
+triggers the AUTOMATED_TESTING rule
+
+=item ARGV
+
+triggers the AUTOMATED_TESTING rule
+
+=item IO
+
+triggers the HEAVY_TESTING rule
+
+=item Memory
+
+triggers the HEAVY_TESTING rule
+
+=item Network
+
+triggers the HEAVY_TESTING rule
+
+=item POD
+
+triggers the RELEASE_TESTING rule (or Meh?)
+
+=item Unix, Mac, OS2, Win32, VMS, …
+
+triggers the OS rule
+
+=back
 
 
 =head1 DIAGNOSTICS
@@ -128,6 +193,18 @@ No bugs have been reported.
 Please report any bugs or feature requests to
 C<bug-test-meta@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
+
+=head1 TODO
+
+=over 4
+
+=item Description hash parsing.
+
+=item Configuration file/ENV
+
+=item Use cases
+
+=back 
 
 =head1 AUTHOR
 
