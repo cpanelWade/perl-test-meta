@@ -3,10 +3,46 @@ package Test::Meta;
 use warnings;
 use strict;
 use Carp;
+use Test::Meta::Action;
 
 our $VERSION = '0.0.1';
 
-# Module implementation here
+# This is a global structure at the moment, might want it controlled by including
+# package at some point...maybe?
+my @metadata = ();
+
+sub import {
+    # Use arguments to set up metadata hash
+    @metadata = @_;
+    # retrieve action configuration and merge somehow
+    my @actions = _get_actions();
+    # apply actions
+    foreach my $action ( @actions ) {
+        next unless $action->is_triggered( \@metadata );
+        last unless $action->apply();
+    }
+}
+
+sub parse_metdata_file {
+}
+
+sub parse_metadata_fh {
+}
+
+sub parse_metadata_string {
+}
+
+sub _get_actions {
+    return (
+        Test::Meta::Action->new(
+            action => [ 'skip', 'Do not run unless RELEASE_TESTING' ],
+            condition => [
+                'pod', 'lint', 'release',
+            ],
+            envvar => [ 'RELEASE_TESTING' ],
+        ),
+    );
+}
 
 
 1;
@@ -24,7 +60,9 @@ This document describes Test::Meta version 0.0.1
 
 =head1 SYNOPSIS
 
-    use Test::Meta;
+    use Test::Meta qw(
+        heavy:IO heavy:memory lint
+    );
 
 =for author to fill in:
     Brief code example(s) here showing commonest usage(s).
