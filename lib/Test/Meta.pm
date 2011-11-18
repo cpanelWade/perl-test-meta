@@ -24,12 +24,20 @@ sub import {
 }
 
 sub parse_metdata_file {
-}
-
-sub parse_metadata_fh {
+    my ($file) = @_;
+    open my $fh, '<', $file or die "Failed to open '$file': $!\n";
+    return parse_metadat_fh( $fh );
 }
 
 sub parse_metadata_string {
+    open my $fh, '<', \$_[0] or die "Failed to read string: $!\n";
+    return parse_metadat_fh( $fh );
+}
+
+sub parse_metadata_fh {
+    my ($fh) = @_;
+    # need to implement this part.
+    return;
 }
 
 sub _get_actions {
