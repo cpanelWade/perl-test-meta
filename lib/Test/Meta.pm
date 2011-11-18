@@ -1,13 +1,19 @@
 package Test::Meta;
 
-use warnings;
 use strict;
-use Carp;
+use warnings;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.1';
 
-# Module implementation here
+sub import {
+    
+}
 
+sub get_meta_hr_from_file {
+    
+}
+
+# ? TODO ?sub get_meta_hr_from_[fh|str|whatever]
 
 1;
 __END__
@@ -19,7 +25,7 @@ Test::Meta - [One line description of module's purpose here]
 
 =head1 VERSION
 
-This document describes Test::Meta version 0.0.1
+This document describes Test::Meta version 0.1
 
 
 =head1 SYNOPSIS
