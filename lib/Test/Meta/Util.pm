@@ -1,29 +1,31 @@
-package Test::Meta;
+package Test::Meta::Util;
 
 use strict;
 use warnings;
 
 our $VERSION = '0.1';
 
-sub import {
+sub get_meta_hr_from_file {
+    my ($file) = @_;
+    open my $fh, '<', $file or die "Could not open '$file' for reading: $!";
+    return get_meta_hr_from_fh($fh);
+}
 
-    require Test::Meta::Desc;
-    require Test::Meta::Rule;
+sub get_meta_hr_from_string {
+    open my $fh, '<', \$_[0] or die "Could not read string: $!";
+    return get_meta_hr_from_fh($fh);
+}
 
-    for my $desc ( @_[ 1 .. $#_ ] ) {
-        my $rules = Test::Meta::Desc::get_desc($desc) || die "'$desc' is an invalid description.";
-        for my $rule ( @{$rules} ) {
-            my $rule_hr = Test::Meta::Rule::get_rule($rule) || die "'$desc' defines an invalid rule '$rule'.";
-            if ( $rule_hr->{'need_action'}->($desc) ) {
-                $rule_hr->{'take_action'}->($desc);
-            }
-        }
-    }
+sub get_meta_hr_from_fh {
+    my ($fh) = @_;
 
-    return 1;
+    # ... TODO parse <$fh> into a hash ...
+
+    return {};
 }
 
 1;
+
 __END__
 
 =encoding utf8
@@ -40,20 +42,15 @@ This document describes Test::Meta version 0.1
 
 =head1 SYNOPSIS
 
-    use Test::Meta qw(POD Memory);
+    use Test::Meta (
+        'POD' => 1,
+        'Memory' => 1
+    );
 
 …
 
     # SKIP POD tests are only run under RELEASE_TESTING.
-
-Or later in the process:
-
-    require Test::Meta;
-    Test::Meta->import(qw(POD Memory));
-
-…
-
-    # SKIP POD tests are only run under RELEASE_TESTING.
+  
 
 =head1 DESCRIPTION
 

@@ -1,29 +1,80 @@
-package Test::Meta;
+package Test::Meta::Rule;
 
 use strict;
 use warnings;
 
+use Module::Want       ();
+use Test::Meta::Action ();
+
 our $VERSION = '0.1';
 
-sub import {
+my $built_ins = {
+    'RELEASE_TESTING' => {
+        'need_action' => sub {
 
-    require Test::Meta::Desc;
-    require Test::Meta::Rule;
+            # my ($desc) = @_;
+            return if $ENV{'RELEASE_TESTING'};
+            return 1;
+        },
+        'take_action' => sub {
+            my ($desc) = @_;
+            Test::Meta::Action::skip_all("$desc tests are only run under RELEASE_TESTING");
+        },
+    },
 
-    for my $desc ( @_[ 1 .. $#_ ] ) {
-        my $rules = Test::Meta::Desc::get_desc($desc) || die "'$desc' is an invalid description.";
-        for my $rule ( @{$rules} ) {
-            my $rule_hr = Test::Meta::Rule::get_rule($rule) || die "'$desc' defines an invalid rule '$rule'.";
-            if ( $rule_hr->{'need_action'}->($desc) ) {
-                $rule_hr->{'take_action'}->($desc);
-            }
-        }
-    }
+    'AUTOMATED_TESTING' => {
+        'need_action' => sub {
 
-    return 1;
+            # my ($desc) = @_;
+            return if !$ENV{'AUTOMATED_TESTING'};
+            return 1;
+        },
+        'take_action' => sub {
+            my ($desc) = @_;
+            Test::Meta::Action::skip_all("$desc tests are only run under AUTOMATED_TESTING");
+        },
+    },
+
+    'HEAVY_TESTING' => {
+        'need_action' => sub {
+
+            # my ($desc) = @_;
+            return if $ENV{'HEAVY_TESTING'};
+            return 1;
+        },
+        'take_action' => sub {
+            my ($desc) = @_;
+            Test::Meta::Action::skip_all("$desc tests are only run under HEAVY_TESTING");
+        },
+    },
+
+    'OS' => {
+        'need_action' => sub {
+            my ($desc) = @_;
+            return if ...;
+            return 1;
+        },
+        'take_action' => sub {
+            my ($desc) = @_;
+            Test::Meta::Action::skip_all("$desc tests are only run under ...");
+        },
+    },
+
+    # 'Meh' => ... turn failures into TODO
+};
+
+sub get_rule {
+    my ($rule) = @_;
+
+    return $rule if exists $built_ins->{$rule};
+
+    my $ns = "Test::Meta::Rule::$rule";
+    return if !Module::Want::have_mod($ns);    # have_mod() sanitizes $ns so no code injection is possible
+    return $ns->get_rule();
 }
 
 1;
+
 __END__
 
 =encoding utf8
@@ -40,20 +91,15 @@ This document describes Test::Meta version 0.1
 
 =head1 SYNOPSIS
 
-    use Test::Meta qw(POD Memory);
+    use Test::Meta (
+        'POD' => 1,
+        'Memory' => 1
+    );
 
 …
 
     # SKIP POD tests are only run under RELEASE_TESTING.
-
-Or later in the process:
-
-    require Test::Meta;
-    Test::Meta->import(qw(POD Memory));
-
-…
-
-    # SKIP POD tests are only run under RELEASE_TESTING.
+  
 
 =head1 DESCRIPTION
 

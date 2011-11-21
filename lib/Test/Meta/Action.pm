@@ -1,29 +1,24 @@
-package Test::Meta;
+package Test::Meta::Action;
 
 use strict;
 use warnings;
 
+# use Test::More (); # prefer lazy load ?
+
 our $VERSION = '0.1';
 
-sub import {
+sub skip_all {
+    require Test::More;
+    goto &Test::More::skip_all;
+}
 
-    require Test::Meta::Desc;
-    require Test::Meta::Rule;
-
-    for my $desc ( @_[ 1 .. $#_ ] ) {
-        my $rules = Test::Meta::Desc::get_desc($desc) || die "'$desc' is an invalid description.";
-        for my $rule ( @{$rules} ) {
-            my $rule_hr = Test::Meta::Rule::get_rule($rule) || die "'$desc' defines an invalid rule '$rule'.";
-            if ( $rule_hr->{'need_action'}->($desc) ) {
-                $rule_hr->{'take_action'}->($desc);
-            }
-        }
-    }
-
-    return 1;
+sub bail_out {
+    require Test::More;
+    goto &Test::More::BAIL_OUT;
 }
 
 1;
+
 __END__
 
 =encoding utf8
@@ -40,20 +35,15 @@ This document describes Test::Meta version 0.1
 
 =head1 SYNOPSIS
 
-    use Test::Meta qw(POD Memory);
+    use Test::Meta (
+        'POD' => 1,
+        'Memory' => 1
+    );
 
 …
 
     # SKIP POD tests are only run under RELEASE_TESTING.
-
-Or later in the process:
-
-    require Test::Meta;
-    Test::Meta->import(qw(POD Memory));
-
-…
-
-    # SKIP POD tests are only run under RELEASE_TESTING.
+  
 
 =head1 DESCRIPTION
 

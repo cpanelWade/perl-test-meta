@@ -4,6 +4,10 @@ MANIFEST
 Makefile.PL
 README
 lib/Test/Meta.pm
+lib/Test/Meta/Desc.pm
+lib/Test/Meta/Rule.pm
+lib/Test/Meta/Util.pm
+lib/Test/Meta/Action.pm
 t/00.load.t
 t/local_perlcritic.t
 t/local_pod-coverage.t

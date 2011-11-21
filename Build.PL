@@ -9,6 +9,7 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/Test/Meta.pm',
     requires => {
         'Test::More' => 0,
+        'Module::Want' => 0,
     },
     add_to_cleanup      => [ 'Test-Meta-*' ],
 );

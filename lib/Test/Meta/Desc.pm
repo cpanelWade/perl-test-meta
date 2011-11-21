@@ -1,29 +1,43 @@
-package Test::Meta;
+package Test::Meta::Desc;
 
 use strict;
 use warnings;
 
+use Module::Want ();
+
 our $VERSION = '0.1';
 
-sub import {
+my $built_ins = {
+    'STDIN' => ['AUTOMATED_TESTING'],
+    'ARGV'  => ['AUTOMATED_TESTING'],
 
-    require Test::Meta::Desc;
-    require Test::Meta::Rule;
+    'IO'      => ['HEAVY_TESTING'],
+    'Memory'  => ['HEAVY_TESTING'],
+    'Network' => ['HEAVY_TESTING'],
 
-    for my $desc ( @_[ 1 .. $#_ ] ) {
-        my $rules = Test::Meta::Desc::get_desc($desc) || die "'$desc' is an invalid description.";
-        for my $rule ( @{$rules} ) {
-            my $rule_hr = Test::Meta::Rule::get_rule($rule) || die "'$desc' defines an invalid rule '$rule'.";
-            if ( $rule_hr->{'need_action'}->($desc) ) {
-                $rule_hr->{'take_action'}->($desc);
-            }
-        }
-    }
+    'POD' => ['RELEASE_TESTING'],
 
-    return 1;
+    'LINT' => ['Meh'],
+
+    'Unix'  => ['OS'],
+    'Mac'   => ['OS'],
+    'OS2'   => ['OS'],
+    'Win32' => ['OS'],
+    'VMS'   => ['OS'],
+};
+
+sub get_desc {
+    my ($desc) = @_;
+
+    return $desc if exists $built_ins->{$desc};
+
+    my $ns = "Test::Meta::Desc::$desc";
+    return if !Module::Want::have_mod($ns);    # have_mod() sanitizes $ns so no code injection is possible
+    return $ns->get_desc();
 }
 
 1;
+
 __END__
 
 =encoding utf8
@@ -40,20 +54,15 @@ This document describes Test::Meta version 0.1
 
 =head1 SYNOPSIS
 
-    use Test::Meta qw(POD Memory);
+    use Test::Meta (
+        'POD' => 1,
+        'Memory' => 1
+    );
 
 …
 
     # SKIP POD tests are only run under RELEASE_TESTING.
-
-Or later in the process:
-
-    require Test::Meta;
-    Test::Meta->import(qw(POD Memory));
-
-…
-
-    # SKIP POD tests are only run under RELEASE_TESTING.
+  
 
 =head1 DESCRIPTION
 
